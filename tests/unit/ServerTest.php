@@ -34,10 +34,10 @@ class ServerTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\React\Http\Server', $server->getHttpServer());
     }
 
-    public function testMockServerListen()
+    public function testMockServerStart()
     {
         $server = new Server(8080);
 
-        $this->assertSame($server, $server->listen());
+        $this->assertSame($server, $server->start());
     }
 }

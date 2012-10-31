@@ -33,6 +33,11 @@ class Server
     protected $socket;
 
     /**
+     * @var int
+     */
+    protected $childPId;
+
+    /**
      * @param string $host
      * @param int $port
      */
@@ -87,14 +92,35 @@ class Server
     }
 
     /**
-     * Start listen on the socket
+     * Start the server
      *
      * @return Server
      */
-    public function listen()
+    public function start()
     {
-        $this->socket->listen($this->port, $this->host);
+        $pid = pcntl_fork();
+
+        if ($pid < 0) {
+            // failed to fork
+            exit;
+        } elseif (0 === $pid) {
+            // child process initiates the server
+            $this->socket->listen($this->port, $this->host);
+            $this->loop->run();
+            $this->loop->stop();
+            exit(0);
+        } else {
+            // parent process tracks the child
+            $this->childPId = $pid;
+        }
 
         return $this;
+    }
+
+    public function __destruct()
+    {
+        if (null !== $this->childPId) {
+            posix_kill($this->childPId, 9);
+        }
     }
 }
