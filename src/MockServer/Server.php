@@ -107,7 +107,6 @@ class Server
             // child process initiates the server
             $this->socket->listen($this->port, $this->host);
             $this->loop->run();
-            $this->loop->stop();
             exit(0);
         } else {
             // parent process tracks the child
