@@ -5,6 +5,9 @@ use React\EventLoop\Factory as EventLoop;
 use React\Socket\Server as Socket;
 use React\Http\Server as HttpServer;
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
 class Server
 {
     /**
@@ -49,6 +52,11 @@ class Server
         $this->loop = EventLoop::create();
         $this->socket = new Socket($this->loop);
         $this->httpServer = new HttpServer($this->socket);
+
+        $server = $this;
+        $this->httpServer->on('request', function ($request, $response) use ($server) {
+            $server->onRequest($request, $response);
+        });
     }
 
     /**
@@ -114,6 +122,12 @@ class Server
         }
 
         return $this;
+    }
+
+    protected function onRequest($request, $response)
+    {
+        $response->writeHead(200, array('Content-Type' => 'text/html'));
+        $response->end("<h1>I'm a Mock Server!</h1>");
     }
 
     public function __destruct()
