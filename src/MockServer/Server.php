@@ -4,6 +4,8 @@ namespace MockServer;
 use React\EventLoop\Factory as EventLoop;
 use React\Socket\Server as Socket;
 use React\Http\Server as HttpServer;
+use React\Http\Request;
+use React\Http\Response;
 
 class Server
 {
@@ -121,7 +123,7 @@ class Server
         return $this;
     }
 
-    protected function onRequest($request, $response)
+    protected function onRequest(Request $request, Response $response)
     {
         $response->writeHead(200, array('Content-Type' => 'text/html'));
         $response->end("<h1>I'm a Mock Server!</h1>");
