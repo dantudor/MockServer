@@ -1,0 +1,20 @@
+{
+    "name": "dantudor/mock-server",
+    "description": "Mock Server",
+    "homepage": "http://github.com/dantudor/MockServer",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dan Tudor",
+            "email": "dtudor01@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-0": { "MockServer": "src/" }
+    },
+    "require": {
+        "php": ">=5.3",
+        "react/http": "dev-master"
+    }
+}
