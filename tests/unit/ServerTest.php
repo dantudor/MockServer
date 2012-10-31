@@ -8,6 +8,7 @@ class ServerTest extends PHPUnit_Framework_TestCase
     {
         $host = 'mock.host';
         $server = new Server($host);
+
         $this->assertSame($server->getHost(), $host);
     }
 
@@ -15,6 +16,7 @@ class ServerTest extends PHPUnit_Framework_TestCase
     {
         $port = 8080;
         $server = new Server('mock.host', $port);
+
         $this->assertSame($server->getPort(), $port);
     }
 }
