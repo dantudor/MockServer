@@ -5,9 +5,6 @@ use React\EventLoop\Factory as EventLoop;
 use React\Socket\Server as Socket;
 use React\Http\Server as HttpServer;
 
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-
 class Server
 {
     /**
