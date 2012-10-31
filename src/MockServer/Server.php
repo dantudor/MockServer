@@ -104,7 +104,7 @@ class Server
             // failed to fork
             exit;
         } elseif (0 === $pid) {
-            // child process initiates the server
+            // child process runs the server
             $this->socket->listen($this->port, $this->host);
             $this->loop->run();
             exit(0);
