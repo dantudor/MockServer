@@ -1,0 +1,3 @@
+ExampleBUndle_homepage:
+    pattern:  /
+    defaults: { _controller: ExampleBundle:Default:index }
