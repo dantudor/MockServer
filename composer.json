@@ -1,6 +1,8 @@
 {
     "name": "dantudor/mock-server",
+    "type": "library",
     "description": "Mock Server",
+    "keywords": ["mock", "server", "primer", "symfony"],
     "homepage": "http://github.com/dantudor/MockServer",
     "license": "MIT",
     "authors": [
