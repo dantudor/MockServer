@@ -5,7 +5,11 @@ php:
   - 5.4
 
 before_script:
-  - composer require react/http:dev-master
+  - composer require react/http:0.2.*
+  - composer require symfony/symfony:2.1.*
+  - composer require monolog/monolog:1.3.x-dev
+  - composer require sensio/framework-extra-bundle:2.1.*
+  - composer require symfony/monolog-bundle:2.1.*
 
 script: phpunit -c tests --coverage-text
 
