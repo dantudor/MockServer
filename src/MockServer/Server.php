@@ -123,16 +123,22 @@ class Server
         return $this;
     }
 
-    protected function onRequest(Request $request, Response $response)
+    public function onRequest(Request $request, Response $response)
     {
         $response->writeHead(200, array('Content-Type' => 'text/html'));
         $response->end("<h1>I'm a Mock Server!</h1>");
     }
 
-    public function __destruct()
+    public function stop()
     {
         if (null !== $this->childPId) {
             posix_kill($this->childPId, 9);
+            $this->childPId = null;
         }
+    }
+
+    public function __destruct()
+    {
+        $this->stop();
     }
 }
