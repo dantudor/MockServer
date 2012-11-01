@@ -10,13 +10,6 @@ framework:
     templating:      { engines: ['twig', 'php'] }
     session:
 
-monolog:
-    handlers:
-        syslog:
-            type: stream
-            path: /var/log/symfony.log
-            level: error
-
 twig:
     debug:            %kernel.debug%
     strict_variables: %kernel.debug%
