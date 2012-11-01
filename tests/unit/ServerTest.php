@@ -39,5 +39,6 @@ class ServerTest extends PHPUnit_Framework_TestCase
         $server = new Server(8080);
 
         $this->assertSame($server, $server->start());
+        $server->stop();
     }
 }
