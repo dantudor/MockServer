@@ -1,4 +1,6 @@
-vendor/
-examples/ExampleBundle/app/cache/
-examples/ExampleBundle/app/logs/
-.idea/
+/composer.lock
+/composer.phar
+/docs/vendor/
+/examples/ExampleBundle/app/cache/
+/examples/ExampleBundle/app/logs/
+/.idea/
