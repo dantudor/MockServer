@@ -1,13 +1,16 @@
 <?php
-namespace MockServer;
+namespace MockServer\Server;
 
 use React\EventLoop\Factory as EventLoop;
 use React\Socket\Server as Socket;
+use React\Socket\ConnectionException;
 use React\Http\Server as HttpServer;
 use React\Http\Request;
 use React\Http\Response;
 
-class Server
+use MockServer\Exception\SocketConnectionException;
+
+abstract class InterfaceServer
 {
     /**
      * @var \React\EventLoop\LibEventLoop|\React\EventLoop\StreamSelectLoop
@@ -33,11 +36,6 @@ class Server
      * @var Socket
      */
     protected $socket;
-
-    /**
-     * @var int
-     */
-    protected $childPId;
 
     /**
      * @param string $host
@@ -105,40 +103,18 @@ class Server
      */
     public function start()
     {
-        $pid = pcntl_fork();
-
-        if ($pid < 0) {
-            // failed to fork
-            exit;
-        } elseif (0 === $pid) {
-            // child process runs the server
+        try {
             $this->socket->listen($this->port, $this->host);
-            $this->loop->run();
-            exit(0);
-        } else {
-            // parent process tracks the child
-            $this->childPId = $pid;
+        } catch(ConnectionException $e) {
+            throw new SocketConnectionException($e->getMessage(), $e->getCode());
         }
 
-        return $this;
+        $this->loop->run();
     }
 
     public function onRequest(Request $request, Response $response)
     {
         $response->writeHead(200, array('Content-Type' => 'text/html'));
         $response->end("<h1>I'm a Mock Server!</h1>");
-    }
-
-    public function stop()
-    {
-        if (null !== $this->childPId) {
-            posix_kill($this->childPId, 9);
-            $this->childPId = null;
-        }
-    }
-
-    public function __destruct()
-    {
-        $this->stop();
     }
 }
