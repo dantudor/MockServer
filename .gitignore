@@ -5,3 +5,4 @@
 /examples/ExampleBundle/app/cache/
 /examples/ExampleBundle/app/logs/
 /.idea/
+/tests/unit/Server/cache/
