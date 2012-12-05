@@ -10,7 +10,7 @@ use React\Http\Response;
 
 use MockServer\Exception\SocketConnectionException;
 
-abstract class InterfaceServer
+abstract class ServerInterface
 {
     /**
      * @var \React\EventLoop\LibEventLoop|\React\EventLoop\StreamSelectLoop
@@ -36,6 +36,11 @@ abstract class InterfaceServer
      * @var Socket
      */
     protected $socket;
+
+    /**
+     * @var \Monolog\Logger
+     */
+    protected $logger;
 
     /**
      * @param string $host
