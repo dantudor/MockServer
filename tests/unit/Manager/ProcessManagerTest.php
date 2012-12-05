@@ -6,12 +6,11 @@ class ProcessManagerTest extends PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->markTestSkipped('A little screwed');
+//        $this->markTestSkipped('A little screwed');
     }
 
     public function testConstructWithNoPidFilePresent()
     {
-        $this->markTestSkipped('touch testing requires php-5.4');
         new MockFs();
 
         $processFile = 'mfs://MockServer.pids';
@@ -38,11 +37,11 @@ class ProcessManagerTest extends PHPUnit_Framework_TestCase
         $process->host  = '127.0.0.1';
         $process->port = 8080;
 
-        $processes = array(
-            '12345' => $process
-        );
+        $processes = new stdClass();
+        $processes->{$process->pid} = $process;
 
         $mockFs = new MockFs();
+        $mockFs->getFileSystem()->reset();
         $mockFs->getFileSystem()->addFile('MockServer.pids', json_encode($processes));
 
         $processFile = 'mfs://MockServer.pids';
@@ -62,21 +61,18 @@ class ProcessManagerTest extends PHPUnit_Framework_TestCase
         $processManager->add(12345, '127.0.0.1', 8080);
         $processManager->save();
 
-        $this->assertEquals('{"pid":12345,"host":"127.0.0.1","port":8080}' . PHP_EOL, $mockFs->getFileSystem()->getChild('MockServer.pids'));
+        $this->assertEquals('{"12345":{"pid":"12345","host":"127.0.0.1","port":8080}}', $mockFs->getFileSystem()->getChild('MockServer.pids')->getContents());
     }
 
     public function testFlushEmptiesPidFile()
     {
-        $this->markTestSkipped();
-
         $process = new stdClass();
         $process->pid = 12345;
         $process->host  = '127.0.0.1';
         $process->port = 8080;
 
-        $processes = array(
-            '12345' => $process
-        );
+        $processes = new stdClass();
+        $processes->{$process->pid} = $process;
 
         $mockFs = new MockFs();
         $mockFs->getFileSystem()->addFile('MockServer.pids', json_encode($processes));
@@ -85,6 +81,6 @@ class ProcessManagerTest extends PHPUnit_Framework_TestCase
         $processManager = new \MockServer\Manager\ProcessManager($processFile);
         $processManager->flush();
 
-        $this->assertEquals(array(), $processManager->load());
+        $this->assertEquals(new stdClass(), $processManager->load());
     }
 }

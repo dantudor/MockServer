@@ -1,6 +1,9 @@
 <?php
 namespace MockServer\Manager;
 
+
+use MockServer\Exception\InvalidServerException;
+
 class ServerManager
 {
     /**
@@ -18,21 +21,35 @@ class ServerManager
         }
     }
 
-    public function create($server, $port, $host = '127.0.0.1', $devMode = false)
+    /**
+     * Create new server
+     *
+     * @param string $server
+     * @param int $port
+     * @param string $host
+     * @param bool $devMode
+     * @throws \InvalidArgumentException
+     */
+    public function create($server, $port, $host = '127.0.0.1', array $flags = null)
     {
         if (false === class_exists($server)) {
-            throw new \InvalidArgumentException('Invalid server type: ' . $server);
+            throw new InvalidServerException('Invalid server type: ' . $server);
         }
 
-        if (true === $devMode) {
-            $devMode = '--dev';
+        $flagString = '';
+        if (null !== $flags) {
+            foreach($flags as $flag) {
+                $flagString .= ' ' . $flag;
+            }
         }
 
-        $cmd = __DIR__ . "/../bin/mockServer start \"{$server}\" \"{$host}\" {$port} \"{$this->pidFile}\" {$devMode}";
+        $cmd = __DIR__ . "/../bin/mockServer start \"{$server}\" \"{$host}\" {$port} \"{$this->pidFile}\" {$flagString}";
         exec($cmd . ' > /dev/null 2>&1 < /dev/null &', $output);
     }
 
     /**
+     * Get pid file
+     *
      * @return string
      */
     public function getPidFile()
@@ -41,6 +58,8 @@ class ServerManager
     }
 
     /**
+     * Set pid file
+     *
      * @param string $pidFile
      */
     public function setPidFile($pidFile)
@@ -50,9 +69,16 @@ class ServerManager
         return $this;
     }
 
+    /**
+     * Stop all servers
+     *
+     * @return ServerManager
+     */
     public function stopAll()
     {
-        $processManager = new ProcessManager($this->pidFile);
+        $processManager = new ProcessManager($this->pidFile, new \Monolog\Logger('Process Manager'));
         $processManager->flush(false);
+
+        return $this;
     }
 }

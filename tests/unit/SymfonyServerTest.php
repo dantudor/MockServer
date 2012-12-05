@@ -19,8 +19,9 @@ class SymfonyServerTest extends PHPUnit_Framework_TestCase
         $port = 8080;
         $host = '127.0.0.1';
         $server = '\ExampleBundle\Server\ExampleServer';
+        $flags = array('--dev');
 
         $serverManager = new ServerManager('/tmp/MockServerPid');
-        $serverManager->create($server, $port, $host, true);
+        $serverManager->create($server, $port, $host, $flags);
     }
 }

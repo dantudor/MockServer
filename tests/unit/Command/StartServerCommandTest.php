@@ -1,9 +1,14 @@
 <?php
 
 use MockServer\Command\StartServerCommand;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class StartServerCommandTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @covers \MockServer\Command\StartServerCommand::configure
+     */
     public function testConfigure()
     {
         $name = 'start';
@@ -31,8 +36,6 @@ class StartServerCommandTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($arguments['pidFile']->isRequired());
         $this->AssertSame('Where do you want to store your pid files?', $arguments['pidFile']->getDescription());
     }
-
-
 }
 
 /**

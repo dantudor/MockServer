@@ -1,4 +1,5 @@
 <?php
+
 namespace MockServer\Command;
 
 use Symfony\Component\Console\Command\Command;
@@ -8,7 +9,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use MockServer\Manager\ProcessManager;
-use MockServer\Manager\ServerManager;
+use MockServer\Exception\ServerPortInUseException;
+use MockServer\Exception\SocketConnectionException;
 
 class StartServerCommand extends Command
 {
@@ -17,8 +19,14 @@ class StartServerCommand extends Command
      */
     protected $output;
 
+    /**
+     * @var String
+     */
     protected $pidFile;
 
+    /**
+     * Configure
+     */
     protected function configure()
     {
         $this
@@ -32,6 +40,13 @@ class StartServerCommand extends Command
         ;
     }
 
+    /**
+     * Execute
+     * @param \Symfony\Component\Console\Input\InputInterface $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @return int|null|void
+     * @throws \Exception
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // When in dev mode we'll need tyo autoload the ExampleBundle
@@ -48,19 +63,20 @@ class StartServerCommand extends Command
         $host = $input->getArgument('host');
         $port = $input->getArgument('port');
 
-        $this->processManager = new ProcessManager($input->getArgument('pidFile'));
+        $this->processManager = new ProcessManager($input->getArgument('pidFile'), new \Monolog\Logger('\MockServer\Manager\ProcessManager'));
         $this->processManager->flush();
 
-        $server = new $class($port, $host);
+        $server = new $class($port, $host, new \Monolog\Logger($class));
+
         try {
             $this->processManager->add(getmypid(), $host, $port);
             $this->processManager->save();
 
             $server->start();
-        } catch (\MockServer\Exception\SocketConnectionException $e) {
+        } catch (SocketConnectionException $e) {
             // Server could not start as port is already in use
             $this->processManager->flush(false, array('host' => $host, 'port' => $port));
-            throw new \Exception('Could not bind to host:port as it was already in use. Killed it though :D');
+            throw new ServerPortInUseException("Could not bind to {$host}:{$port} as it was already in use. Killed it though :D");
         }
     }
 }

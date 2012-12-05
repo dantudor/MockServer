@@ -1,7 +1,9 @@
 <?php
 namespace MockServer\Manager;
 
+use MockServer\Exception\ProcessSetupException;
 use Symfony\Component\Filesystem\Filesystem;
+use \Monolog\Logger;
 
 class ProcessManager
 {
@@ -11,26 +13,39 @@ class ProcessManager
     protected $processFile;
 
     /**
-     * @var array
+     * @var stdClass
      */
-    protected $processes = array();
+    protected $processes;
 
     /**
      * @var \Symfony\Component\Filesystem\Filesystem
      */
     protected $filesystem;
 
+    /**
+     * @var \Monolog\Logger
+     */
+    protected $logger = null;
+
      /**
       * @param $processFile
       */
-    public function __construct($processFile)
+    public function __construct($processFile, Logger $logger = null)
     {
+        $this->processes = new \stdClass();
         $this->processFile = (string) $processFile;
         $this->filesystem = new Filesystem();
 
-        if (false == $this->filesystem->exists($this->processFile)) {
-            $this->filesystem->touch($this->processFile);
+        if (false === $this->filesystem->exists($this->processFile)) {
+            file_put_contents($this->processFile, new \stdClass());
         }
+
+        //@codeCoverageIgnoreOn
+        if (null !== $logger) {
+            $this->logger = $logger;
+            $this->logger->info('Using process file: ' . $this->processFile);
+        }
+        //@codeCoverageIgnoreOff
     }
 
     /**
@@ -44,13 +59,80 @@ class ProcessManager
     }
 
     /**
+     * Load from process file
+     *
+     * @return array
+     */
+    public function load()
+    {
+        //@codeCoverageIgnoreOn
+        if (null !== $this->logger) {
+            $this->logger->info('Load Processes');
+        }
+        //@codeCoverageIgnoreOff
+
+        $this->processes = array();
+
+        if (true === $this->filesystem->exists($this->processFile)) {
+            $this->processes = json_decode(file_get_contents($this->processFile));
+        }
+
+        return $this->processes;
+    }
+
+    /**
+     * Add a new process under management
+     *
+     * @param string $pid
+     * @param string $host
+     * @param int $port
+     */
+    public function add($pid, $host, $port)
+    {
+        //@codeCoverageIgnoreOn
+        if (null !== $this->logger) {
+            $this->logger->info('Add Process:', array('pid' => $pid, 'host' => $host, 'port' => $port));
+        }
+        //@codeCoverageIgnoreOff
+
+        $process = array(
+            'pid' => (string) $pid,
+            'host' => (string) $host,
+            'port' => (int) $port
+        );
+
+        $this->processes->{$pid} = $process;
+    }
+
+    /**
+     * Save to file
+     */
+    public function save()
+    {
+        //@codeCoverageIgnoreOn
+        if (null !== $this->logger) {
+            $this->logger->info('Save Processes');
+        }
+        //@codeCoverageIgnoreOff
+
+        $this->filesystem->remove($this->processFile);
+        file_put_contents($this->processFile, json_encode($this->processes));
+    }
+
+    /**
      * Flush memory and the file of all processes - Kill when requested
      */
     public function flush($onlyDead = true, array $match = null)
     {
-        $this->load();
+        //@codeCoverageIgnoreOn
+        if (null !== $this->logger) {
+            $this->logger->info('Flush');
+        }
+        //@codeCoverageIgnoreOff
 
-        foreach ($this->processes as $process) {
+        $this->load();
+        $processes = get_object_vars($this->processes);
+        foreach ($processes as $process) {
             if (null === $match || $this->matchProcess($process, $match)) {
                 if (true === $this->isActive($process->pid)) {
                     if (true === $onlyDead) {
@@ -59,53 +141,11 @@ class ProcessManager
                     exec('kill -9 ' . $process->pid);
                 }
 
-                unset($this->processes[$process->pid]);
+                unset($this->processes->{$process->pid});
             }
         }
 
         $this->save();
-    }
-
-    public function add($pid, $host, $port)
-    {
-        $process = array(
-            'pid' => $pid,
-            'host' => $host,
-            'port' => $port
-        );
-
-        $this->processes[$pid] = $process;
-    }
-
-    /**
-     * Save to file
-     */
-    public function save()
-    {
-        unlink($this->processFile);
-
-        foreach ($this->processes as $process) {
-            file_put_contents($this->processFile, json_encode($process) . PHP_EOL, FILE_APPEND);
-        }
-    }
-
-    /**
-     * load from file
-     */
-    public function load()
-    {
-        $this->processes = array();
-
-        if (true === $this->filesystem->exists($this->processFile)) {
-            $processes = json_decode(@file_get_contents($this->processFile));
-            if (null !== $processes) {
-                foreach ($processes as $process) {
-                    $this->processes[$process->pid] = $process;
-                }
-            }
-        }
-
-        return $this->processes;
     }
 
     /**
@@ -126,6 +166,8 @@ class ProcessManager
     }
 
     /**
+     * Match Process
+     *
      * @param $process
      * @param array $criteria
      * @return bool
@@ -141,5 +183,15 @@ class ProcessManager
         }
 
         return $matched;
+    }
+
+    /**
+     * Sets the Monolog logger instance to be used for logging.
+     *
+     * @param \Monolog\Logger $logger
+     */
+    public function setLogger(Logger $logger)
+    {
+        $this->logger = $logger;
     }
 }

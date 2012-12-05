@@ -2,7 +2,7 @@
 
 use MockServer\Server;
 
-class ServerTest extends PHPUnit_Framework_TestCase
+class ServerInterfaceTest extends PHPUnit_Framework_TestCase
 {
     public function testMockServerGetPort()
     {
@@ -35,6 +35,6 @@ class ServerTest extends PHPUnit_Framework_TestCase
     }
 }
 
-class TestServer extends \MockServer\Server\InterfaceServer {
+class TestServer extends \MockServer\Server\ServerInterface {
 
 }
