@@ -6,5 +6,5 @@ namespace MockServer\Exception;
  */
 interface Exception
 {
-
+    // intentionally blank
 }
