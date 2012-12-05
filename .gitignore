@@ -1,6 +1,7 @@
 /composer.lock
 /composer.phar
-/docs/vendor/
+/docs/
+/vendor/
 /examples/ExampleBundle/app/cache/
 /examples/ExampleBundle/app/logs/
 /.idea/
