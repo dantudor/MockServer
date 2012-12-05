@@ -68,17 +68,4 @@ class ServerManager
 
         return $this;
     }
-
-    /**
-     * Stop all servers
-     *
-     * @return ServerManager
-     */
-    public function stopAll()
-    {
-        $processManager = new ProcessManager($this->pidFile, new \Monolog\Logger('Process Manager'));
-        $processManager->flush(false);
-
-        return $this;
-    }
 }
