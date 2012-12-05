@@ -2,20 +2,18 @@ imports:
     - { resource: security.yml }
 
 framework:
-    secret:          %secret%
-    router:          { resource: "%kernel.root_dir%/config/routing.yml" }
-    form:            true
+    secret: %secret%
+    router: { resource: "%kernel.root_dir%/config/routing.yml" }
+    form: true
     csrf_protection: true
-    validation:      { enable_annotations: true }
-    templating:      { engines: ['twig', 'php'] }
+    validation: { enable_annotations: true }
+    templating: { engines: ['twig', 'php'] }
     session:
 
 twig:
-    debug:            %kernel.debug%
+    debug: %kernel.debug%
     strict_variables: %kernel.debug%
 
 parameters:
     locale: en
     secret: ThisTokenIsNotSoSecretChangeIt
-
-

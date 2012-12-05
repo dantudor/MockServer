@@ -1,1 +1,1 @@
-<h1>I'm a Mock Server</h1>
+<h1>I'm a Symfony 2 Mock Server</h1>
