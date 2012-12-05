@@ -57,7 +57,9 @@ abstract class ServerInterface
 
         $server = $this;
         $this->httpServer->on('request', function ($request, $response) use ($server) {
+            // @codeCoverageIgnoreStart
             $server->onRequest($request, $response);
+            // @codeCoverageIgnoreEnd
         });
     }
 
@@ -117,9 +119,12 @@ abstract class ServerInterface
         $this->loop->run();
     }
 
-    public function onRequest(Request $request, Response $response)
-    {
-        $response->writeHead(200, array('Content-Type' => 'text/html'));
-        $response->end("<h1>I'm a Mock Server!</h1>");
-    }
+    /**
+     * onRequest Callback
+     *
+     * @param \React\Http\Request $request
+     * @param \React\Http\Response $response
+     */
+    abstract public function onRequest(Request $request, Response $response);
+
 }

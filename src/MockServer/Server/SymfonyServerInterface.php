@@ -1,6 +1,9 @@
 <?php
 namespace MockServer\Server;
 
+use MockServer\Exception\KernelInvalidException;
+use MockServer\Exception\KernelMissingException;
+
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpKernel\Kernel;
 use React\Http\Request;
@@ -9,27 +12,37 @@ use Monolog\Logger;
 
 abstract class SymfonyServerInterface extends ServerInterface
 {
+    /**
+     * @var string
+     */
     protected $kernelClassName;
 
+    /**
+     * @var \Symfony\Component\HttpKernel\Kernel
+     */
     protected $kernel;
 
-    public function __construct($port, $host, Logger $logger = null)
+    public function __construct($port, $host = '127.0.0.1', Logger $logger = null)
     {
         if (false === class_exists($this->kernelClassName)) {
-            throw new \InvalidArgumentException('The Kernel class does not exist: ' . $this->kernelClassName);
+            throw new KernelMissingException("The '{$this->kernelClassName}' kernel does not exist");
         }
 
         $kernelClassName = $this->kernelClassName;
         $this->kernel = new $kernelClassName('prod', false);
 
+        if (false === $this->kernel instanceof Kernel) {
+            throw new KernelInvalidException("The '{$this->kernelClassName}' kernel must extend \\Symfony\\Component\\HttpKernel\\Kernel");
+        }
+
         parent::__construct($port, $host);
 
-        //@codeCoverageIgnoreOn
+        // @codeCoverageIgnoreStart
         if (null !== $logger) {
             $this->logger = $logger;
             $this->logger->info('Created Server: ', array('host' => $host, 'port' => $port));
         }
-        //@codeCoverageIgnoreOff
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -46,11 +59,11 @@ abstract class SymfonyServerInterface extends ServerInterface
      */
     public function onRequest(Request $request, Response $response)
     {
-        //@codeCoverageIgnoreOn
+        // @codeCoverageIgnoreStart
         if (null !== $this->logger) {
             $this->logger->info('Request: ', array('path' => $request->getPath(), 'method' => $request->getMethod(), 'query' => $request->getQuery()));
         }
-        //@codeCoverageIgnoreOff
+        // @codeCoverageIgnoreEnd
 
         $kernelResponse = $this->kernel->handle(SymfonyRequest::create($request->getPath()));
 
