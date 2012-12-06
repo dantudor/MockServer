@@ -1,9 +1,15 @@
 <?php
-namespace MockServer\Manager;
 
+namespace MockServer\Manager;
 
 use MockServer\Exception\InvalidServerException;
 
+/**
+ * Server Manager
+ *
+ * The server manager creates new server instances and reports them to the process manager
+ * No doubt this will become much more comprehensive in the future.
+ */
 class ServerManager
 {
     /**
