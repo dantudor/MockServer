@@ -1,10 +1,13 @@
 <?php
 namespace MockServer\Manager;
 
-use MockServer\Exception\ProcessSetupException;
 use Symfony\Component\Filesystem\Filesystem;
-use \Monolog\Logger;
+use Monolog\Logger;
 
+/**
+ * Process Manager
+ * This class manages the server instances at a process level
+ */
 class ProcessManager
 {
     /**
