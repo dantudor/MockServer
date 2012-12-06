@@ -40,12 +40,12 @@ class ProcessManager
             file_put_contents($this->processFile, new \stdClass());
         }
 
-        //@codeCoverageIgnoreOn
+        // @codeCoverageIgnoreStart
         if (null !== $logger) {
             $this->logger = $logger;
             $this->logger->info('Using process file: ' . $this->processFile);
         }
-        //@codeCoverageIgnoreOff
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -65,11 +65,11 @@ class ProcessManager
      */
     public function load()
     {
-        //@codeCoverageIgnoreOn
+        // @codeCoverageIgnoreStart
         if (null !== $this->logger) {
             $this->logger->info('Load Processes');
         }
-        //@codeCoverageIgnoreOff
+        // @codeCoverageIgnoreEnd
 
         $this->processes = array();
 
@@ -86,37 +86,43 @@ class ProcessManager
      * @param string $pid
      * @param string $host
      * @param int $port
+     * @return ProcessManager
      */
     public function add($pid, $host, $port)
     {
-        //@codeCoverageIgnoreOn
+        // @codeCoverageIgnoreStart
         if (null !== $this->logger) {
             $this->logger->info('Add Process:', array('pid' => $pid, 'host' => $host, 'port' => $port));
         }
-        //@codeCoverageIgnoreOff
+        // @codeCoverageIgnoreEnd
 
-        $process = array(
-            'pid' => (string) $pid,
-            'host' => (string) $host,
-            'port' => (int) $port
-        );
+        $process = new \stdClass();
+        $process->pid = (string) $pid;
+        $process->host = (string) $host;
+        $process->port = (int) $port;
 
         $this->processes->{$pid} = $process;
+
+        return $this;
     }
 
     /**
      * Save to file
+     *
+     * @return ProcessManager
      */
     public function save()
     {
-        //@codeCoverageIgnoreOn
+        // @codeCoverageIgnoreStart
         if (null !== $this->logger) {
             $this->logger->info('Save Processes');
         }
-        //@codeCoverageIgnoreOff
+        // @codeCoverageIgnoreEnd
 
         $this->filesystem->remove($this->processFile);
         file_put_contents($this->processFile, json_encode($this->processes));
+
+        return $this;
     }
 
     /**
@@ -124,16 +130,16 @@ class ProcessManager
      */
     public function flush($onlyDead = true, array $match = null)
     {
-        //@codeCoverageIgnoreOn
+        // @codeCoverageIgnoreStart
         if (null !== $this->logger) {
             $this->logger->info('Flush');
         }
-        //@codeCoverageIgnoreOff
+        // @codeCoverageIgnoreEnd
 
         $this->load();
         $processes = get_object_vars($this->processes);
         foreach ($processes as $process) {
-            if (null === $match || $this->matchProcess($process, $match)) {
+            if (null === $match || $this->match($process, $match)) {
                 if (true === $this->isActive($process->pid)) {
                     if (true === $onlyDead) {
                         continue;
@@ -172,7 +178,7 @@ class ProcessManager
      * @param array $criteria
      * @return bool
      */
-    protected function matchProcess($process, array $criteria)
+    protected function match($process, array $criteria)
     {
         $matched = true;
 
@@ -189,6 +195,7 @@ class ProcessManager
      * Sets the Monolog logger instance to be used for logging.
      *
      * @param \Monolog\Logger $logger
+     * @codeCoverageIgnore
      */
     public function setLogger(Logger $logger)
     {
