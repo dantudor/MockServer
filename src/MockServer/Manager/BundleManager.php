@@ -58,7 +58,7 @@ class BundleManager extends Generator
 //            'extension_alias' => Container::underscore($basename),
         );
 
-        $this->renderFile($this->skeletonDir, 'Bundle.php.twig', $dir . '/' . $bundle . '.php', $parameters);
-        $this->renderFile($this->skeletonDir, 'DefaultController.php.twig', $dir . '/Controller/DefaultController.php', $parameters);
+        $this->renderFile($this->skeletonDir, 'Bundle.php', $dir . '/' . $bundle . '.php', $parameters);
+        $this->renderFile($this->skeletonDir, 'DefaultController.php', $dir . '/Controller/DefaultController.php', $parameters);
     }
 }

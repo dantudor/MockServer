@@ -3,14 +3,43 @@
 use MockServer\Manager\BundleManager;
 use MockFs\MockFs;
 use Symfony\Component\Filesystem\Filesystem;
+use Sensio\Bundle\GeneratorBundle\Generator\Generator;
 
 class BundleManagerTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @var TestGenerator
+     */
+    protected $generator;
+
+    /**
+     * @var string
+     */
     protected $skeletonDirectory;
 
+    /**
+     * @var \MockFs\MockFs
+     */
+    protected $mockFs;
+
+    /**
+     * @var array
+     */
+    protected $parameters;
+
+    /**
+     * Setup
+     */
     public function setUp()
     {
+        $this->generator = new TestGenerator();
+        $this->mockFs = new MockFs();
         $this->skeletonDirectory = __DIR__ . '/../../../src/MockServer/Resources/Skeleton/SymfonyBundle';
+
+        $this->parameters = array(
+            'namespace' => 'MockNamespace',
+            'bundle' => 'MockBundle',
+        );
     }
 
     /**
@@ -19,43 +48,47 @@ class BundleManagerTest extends PHPUnit_Framework_TestCase
      */
     public function testBundleManagerThrowsExceptionWhenTargetDirectoryIsNotEmpty()
     {
-        $namespace = 'MockNamespace';
         $directory = '/targetDirectory';
         $target = 'mfs:/' . $directory;
 
-        $mockFs = new MockFs();
-        $mockFs->getFileSystem()->addFile('Im in your way.txt', '', $directory . '/' . $namespace);
+
+        $this->mockFs->getFileSystem()->addFile('Im in your way.txt', '', $directory . '/' . $this->parameters['namespace']);
 
         $bundleManager = new BundleManager(new Filesystem(), '/');
-        $bundleManager->generate($namespace, 'MockBundle', $target);
+        $bundleManager->generate($this->parameters['namespace'], 'MockBundle', $target);
     }
 
     /**
      * @covers \MockServer\Manager\BundleManager
      */
-    public function testBundleManagerGeneratesBundleClass()
+    public function testBundleManagerGeneratesBundle()
     {
-        $namespace = 'MockNamespace';
-        $bundle = 'MockBundle';
-        $target = 'mfs://';
-$contents = "<?php
-
-namespace MockNamespace;
-
-use Symfony\\Component\\HttpKernel\\Bundle\\Bundle;
-
-class MockBundle extends Bundle
-{
-}
-";
-        $mockFs = new MockFs();
+        $expectedContent = $this->generator->render($this->skeletonDirectory, 'Bundle.php', $this->parameters);
 
         $bundleManager = new BundleManager(new Filesystem(), $this->skeletonDirectory);
-        $bundleManager->generate($namespace, $bundle, $target);
+        $bundleManager->generate($this->parameters['namespace'], $this->parameters['bundle'], 'mfs://');
 
-        /** @var $newFile \MockFs\Object\File */
-        $newFile = $mockFs->getFileSystem()->getChildByPath('/MockNamespace/MockBundle.php');
+        $this->assertSame($expectedContent, $this->mockFs->getFileSystem()->getChildByPath('/MockNamespace/MockBundle.php')->getContents());
+    }
 
-        $this->assertSame($contents, $newFile->getContents());
+    /**
+     * @covers \MockServer\Manager\BundleManager
+     */
+    public function testBundleManagerGeneratesDefaultController()
+    {
+        $expectedContent = $this->generator->render($this->skeletonDirectory, 'DefaultController.php', $this->parameters);
+
+        $bundleManager = new BundleManager(new Filesystem(), $this->skeletonDirectory);
+        $bundleManager->generate($this->parameters['namespace'], $this->parameters['bundle'], 'mfs://');
+
+        $this->assertSame($expectedContent, $this->mockFs->getFileSystem()->getChildByPath('/MockNamespace/Controller/DefaultController.php')->getContents());
+    }
+}
+
+class TestGenerator extends Generator
+{
+    public function render($skeletonDirectory, $template, $parameters)
+    {
+        return parent::render($skeletonDirectory, $template, $parameters);
     }
 }
