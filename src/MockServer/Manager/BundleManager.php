@@ -53,7 +53,6 @@ class BundleManager extends Generator
         $parameters = array(
             'namespace' => $namespace,
             'bundle' => $bundle,
-//            'format' => 'yml',
             'bundle_basename' => $basename,
             'extension_alias' => Container::underscore($basename),
         );
@@ -64,5 +63,6 @@ class BundleManager extends Generator
         $this->renderFile($this->skeletonDir, 'index.html.twig', $dir . '/Resources/views/Default/index.html.twig', $parameters);
         $this->renderFile($this->skeletonDir, 'Extension.php', $dir . '/DependencyInjection/' . $basename . 'Extension.php', $parameters);
         $this->renderFile($this->skeletonDir, 'Server.php', $dir . '/Server/' . $basename . 'Server.php', $parameters);
+        $this->renderFile($this->skeletonDir, 'AppKernel.php', $dir . '/app/AppKernel.php', $parameters);
     }
 }
