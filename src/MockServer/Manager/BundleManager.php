@@ -64,5 +64,6 @@ class BundleManager extends Generator
         $this->renderFile($this->skeletonDir, 'Extension.php', $dir . '/DependencyInjection/' . $basename . 'Extension.php', $parameters);
         $this->renderFile($this->skeletonDir, 'Server.php', $dir . '/Server/' . $basename . 'Server.php', $parameters);
         $this->renderFile($this->skeletonDir, 'AppKernel.php', $dir . '/app/AppKernel.php', $parameters);
+        $this->renderFile($this->skeletonDir, 'config.yml', $dir . '/app/config/config.yml', $parameters);
     }
 }
