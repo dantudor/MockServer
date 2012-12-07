@@ -163,6 +163,19 @@ class BundleManagerTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($expectedContent, $this->mockFs->getFileSystem()->getChildByPath('/MockNamespace/app/config/config.yml')->getContents());
     }
+
+    /**
+     * @covers \MockServer\Manager\BundleManager
+     */
+    public function testBundleManagerGeneratesRoutingYml()
+    {
+        $expectedContent = $this->generator->render($this->skeletonDirectory, 'routing.yml', $this->parameters);
+
+        $bundleManager = new BundleManager(new Filesystem(), $this->skeletonDirectory);
+        $bundleManager->generate($this->parameters['namespace'], $this->parameters['bundle'], 'mfs://');
+
+        $this->assertSame($expectedContent, $this->mockFs->getFileSystem()->getChildByPath('/MockNamespace/app/config/routing.yml')->getContents());
+    }
 }
 
 class TestGenerator extends Generator
