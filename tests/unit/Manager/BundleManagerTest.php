@@ -124,6 +124,19 @@ class BundleManagerTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($expectedContent, $this->mockFs->getFileSystem()->getChildByPath('/MockNamespace/DependencyInjection/' . $this->parameters['bundle_basename'] . 'Extension.php')->getContents());
     }
+
+    /**
+     * @covers \MockServer\Manager\BundleManager
+     */
+    public function testBundleManagerGeneratesServer()
+    {
+        $expectedContent = $this->generator->render($this->skeletonDirectory, 'Server.php', $this->parameters);
+
+        $bundleManager = new BundleManager(new Filesystem(), $this->skeletonDirectory);
+        $bundleManager->generate($this->parameters['namespace'], $this->parameters['bundle'], 'mfs://');
+
+        $this->assertSame($expectedContent, $this->mockFs->getFileSystem()->getChildByPath('/MockNamespace/Server/' . $this->parameters['bundle_basename'] . 'Server.php')->getContents());
+    }
 }
 
 class TestGenerator extends Generator
