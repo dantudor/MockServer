@@ -49,18 +49,19 @@ class BundleManager extends Generator
             throw new BundleGenerationException(sprintf('Unable to generate the bundle as the target directory "%s" is not empty.', realpath($dir)));
         }
 
-//        $basename = substr($bundle, 0, -6);
+        $basename = substr($bundle, 0, -6);
         $parameters = array(
             'namespace' => $namespace,
             'bundle' => $bundle,
 //            'format' => 'yml',
-//            'bundle_basename' => $basename,
-//            'extension_alias' => Container::underscore($basename),
+            'bundle_basename' => $basename,
+            'extension_alias' => Container::underscore($basename),
         );
 
         $this->renderFile($this->skeletonDir, 'Bundle.php', $dir . '/' . $bundle . '.php', $parameters);
         $this->renderFile($this->skeletonDir, 'DefaultController.php', $dir . '/Controller/DefaultController.php', $parameters);
         $this->renderFile($this->skeletonDir, 'services.yml', $dir . '/Resources/config/services.yml', $parameters);
         $this->renderFile($this->skeletonDir, 'index.html.twig', $dir . '/Resources/views/Default/index.html.twig', $parameters);
+        $this->renderFile($this->skeletonDir, 'Extension.php', $dir . '/DependencyInjection/' . $basename . 'Extension.php', $parameters);
     }
 }

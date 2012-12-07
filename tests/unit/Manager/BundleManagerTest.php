@@ -39,6 +39,8 @@ class BundleManagerTest extends PHPUnit_Framework_TestCase
         $this->parameters = array(
             'namespace' => 'MockNamespace',
             'bundle' => 'MockBundle',
+            'bundle_basename' => 'Mock',
+            'extension_alias' => 'mock',
         );
     }
 
@@ -108,6 +110,19 @@ class BundleManagerTest extends PHPUnit_Framework_TestCase
         $bundleManager->generate($this->parameters['namespace'], $this->parameters['bundle'], 'mfs://');
 
         $this->assertSame($expectedContent, $this->mockFs->getFileSystem()->getChildByPath('/MockNamespace/Resources/views/Default/index.html.twig')->getContents());
+    }
+
+    /**
+     * @covers \MockServer\Manager\BundleManager
+     */
+    public function testBundleManagerGeneratesExtension()
+    {
+        $expectedContent = $this->generator->render($this->skeletonDirectory, 'Extension.php', $this->parameters);
+
+        $bundleManager = new BundleManager(new Filesystem(), $this->skeletonDirectory);
+        $bundleManager->generate($this->parameters['namespace'], $this->parameters['bundle'], 'mfs://');
+
+        $this->assertSame($expectedContent, $this->mockFs->getFileSystem()->getChildByPath('/MockNamespace/DependencyInjection/' . $this->parameters['bundle_basename'] . 'Extension.php')->getContents());
     }
 }
 
