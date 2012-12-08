@@ -12,7 +12,7 @@ class AppKernel extends Kernel
             new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
             new \Symfony\Bundle\SecurityBundle\SecurityBundle(),
             new \Symfony\Bundle\TwigBundle\TwigBundle(),
-            new \{{ namespace }}\{{ namespace }}()
+            new \{{ namespace }}\{{ bundle }}()
         );
 
         return $bundles;
