@@ -67,5 +67,11 @@ class BundleManager extends Generator
         $this->renderFile($this->skeletonDir, 'config.yml', $dir . '/app/config/config.yml', $parameters);
         $this->renderFile($this->skeletonDir, 'routing.yml', $dir . '/app/config/routing.yml', $parameters);
         $this->renderFile($this->skeletonDir, 'security.yml', $dir . '/app/config/security.yml', $parameters);
+
+        $this->filesystem->mkdir($dir . '/app/cache');
+        $this->filesystem->mkdir($dir . '/app/logs');
+        $this->filesystem->mkdir($dir . '/Resources/public/css');
+        $this->filesystem->mkdir($dir . '/Resources/public/images');
+        $this->filesystem->mkdir($dir . '/Resources/public/js');
     }
 }
