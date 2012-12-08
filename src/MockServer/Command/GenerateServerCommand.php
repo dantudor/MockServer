@@ -12,6 +12,7 @@ use Sensio\Bundle\GeneratorBundle\Manipulator\KernelManipulator;
 use Sensio\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
 use Sensio\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
 use MockServer\Manager\BundleManager;
+use Sensio\Bundle\GeneratorBundle\Command\Validators;
 
 /**
  * Generates a mock server bundle
@@ -61,11 +62,12 @@ class GenerateServerCommand extends ContainerAwareCommand
 
         $dialog->writeSection($output, 'Bundle generation');
 
-        if (!$this->getContainer()->get('filesystem')->isAbsolutePath($dir)) {
-            $dir = getcwd().'/'.$dir;
-        }
+//        if (!$this->getContainer()->get('filesystem')->isAbsolutePath($dir)) {
+//            $dir = getcwd().'/'.$dir;
+//        }
 
         $generator = $this->getGenerator();
+
         $generator->generate($namespace, $bundle, $dir);
 
         $output->writeln('Generating the bundle code: <info>OK</info>');
@@ -77,10 +79,7 @@ class GenerateServerCommand extends ContainerAwareCommand
         $runner($this->checkAutoloader($output, $namespace, $bundle, $dir));
 
         // register the bundle in the Kernel class
-        $runner($this->updateKernel($dialog, $input, $output, $this->getContainer()->get('kernel'), $namespace, $bundle));
-
-        // routing
-        $runner($this->updateRouting($dialog, $input, $output, $bundle, $format));
+//        $runner($this->updateKernel($dialog, $input, $output, $this->getContainer()->get('kernel'), $namespace, $bundle));
 
         $dialog->writeGeneratorSummary($output, $errors);
     }
@@ -161,7 +160,7 @@ class GenerateServerCommand extends ContainerAwareCommand
     protected function getGenerator()
     {
         if (null === $this->generator) {
-            $this->generator = new \MockServer\Manager\BundleManager($this->getContainer()->get('filesystem'), __DIR__ . '/../Resources/Skeleton/SymfonyBundle');
+            $this->generator = new \MockServer\Manager\BundleManager(new \Symfony\Component\Filesystem\Filesystem(), __DIR__ . '/../Resources/Skeleton/SymfonyBundle');
         }
 
         return $this->generator;

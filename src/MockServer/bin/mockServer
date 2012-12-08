@@ -5,6 +5,7 @@ require __DIR__ . '/../../../vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
 use MockServer\Command\StartServerCommand;
+use MockServer\Command\GenerateServerCommand;
 
 $application = new Application();
 $application->add(new StartServerCommand);
