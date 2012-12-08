@@ -122,7 +122,6 @@ class ProcessManager
         }
         // @codeCoverageIgnoreEnd
 
-        $this->filesystem->remove($this->processFile);
         file_put_contents($this->processFile, json_encode($this->processes));
 
         return $this;
