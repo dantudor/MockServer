@@ -8,4 +8,5 @@ use MockServer\Command\StartServerCommand;
 
 $application = new Application();
 $application->add(new StartServerCommand);
+$application->add(new GenerateServerCommand);
 $application->run();

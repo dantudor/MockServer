@@ -11,7 +11,7 @@ class StartServerCommandTest extends PHPUnit_Framework_TestCase
      */
     public function testConfigure()
     {
-        $name = 'start';
+        $name = 'mock:server:start';
         $description = 'Start a new Mock Server';
         $startServerCommand = new \MockServer\Command\StartServerCommand();
 

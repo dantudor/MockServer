@@ -30,7 +30,7 @@ class StartServerCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('start')
+            ->setName('mock:server:start')
             ->setDescription('Start a new Mock Server')
             ->addArgument('class', InputArgument::REQUIRED, 'What server type should be started?')
             ->addArgument('host', InputArgument::REQUIRED, 'What hostname should the server use?')
