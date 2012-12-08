@@ -25,6 +25,11 @@ class StartServerCommand extends Command
     protected $pidFile;
 
     /**
+     * @var \MockServer\Manager\ProcessManager
+     */
+    protected $processManager;
+
+    /**
      * Configure
      */
     protected function configure()
@@ -63,10 +68,11 @@ class StartServerCommand extends Command
         $host = $input->getArgument('host');
         $port = $input->getArgument('port');
 
-        $this->processManager = new ProcessManager($input->getArgument('pidFile'), new \Monolog\Logger('\MockServer\Manager\ProcessManager'));
+        $this->processManager = new ProcessManager($input->getArgument('pidFile'));
         $this->processManager->flush();
 
-        $server = new $class($port, $host, new \Monolog\Logger($class));
+        /** @var $server \MockServer\Server\ServerInterface */
+        $server = new $class($port, $host);
 
         try {
             $this->processManager->add(getmypid(), $host, $port);

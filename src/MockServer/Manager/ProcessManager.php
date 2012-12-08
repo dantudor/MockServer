@@ -2,7 +2,6 @@
 namespace MockServer\Manager;
 
 use Symfony\Component\Filesystem\Filesystem;
-use Monolog\Logger;
 
 /**
  * Process Manager
@@ -16,7 +15,7 @@ class ProcessManager
     protected $processFile;
 
     /**
-     * @var stdClass
+     * @var \stdClass
      */
     protected $processes;
 
@@ -42,13 +41,6 @@ class ProcessManager
         if (false === $this->filesystem->exists($this->processFile)) {
             file_put_contents($this->processFile, new \stdClass());
         }
-
-        // @codeCoverageIgnoreStart
-        if (null !== $logger) {
-            $this->logger = $logger;
-            $this->logger->info('Using process file: ' . $this->processFile);
-        }
-        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -68,12 +60,6 @@ class ProcessManager
      */
     public function load()
     {
-        // @codeCoverageIgnoreStart
-        if (null !== $this->logger) {
-            $this->logger->info('Load Processes');
-        }
-        // @codeCoverageIgnoreEnd
-
         $this->processes = array();
 
         if (true === $this->filesystem->exists($this->processFile)) {
@@ -93,12 +79,6 @@ class ProcessManager
      */
     public function add($pid, $host, $port)
     {
-        // @codeCoverageIgnoreStart
-        if (null !== $this->logger) {
-            $this->logger->info('Add Process:', array('pid' => $pid, 'host' => $host, 'port' => $port));
-        }
-        // @codeCoverageIgnoreEnd
-
         $process = new \stdClass();
         $process->pid = (string) $pid;
         $process->host = (string) $host;
@@ -116,12 +96,6 @@ class ProcessManager
      */
     public function save()
     {
-        // @codeCoverageIgnoreStart
-        if (null !== $this->logger) {
-            $this->logger->info('Save Processes');
-        }
-        // @codeCoverageIgnoreEnd
-
         file_put_contents($this->processFile, json_encode($this->processes));
 
         return $this;
@@ -132,12 +106,6 @@ class ProcessManager
      */
     public function flush($onlyDead = true, array $match = null)
     {
-        // @codeCoverageIgnoreStart
-        if (null !== $this->logger) {
-            $this->logger->info('Flush');
-        }
-        // @codeCoverageIgnoreEnd
-
         $this->load();
         $processes = get_object_vars($this->processes);
         foreach ($processes as $process) {
