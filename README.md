@@ -3,27 +3,32 @@ MockServer
 
 [![Build Status](https://secure.travis-ci.org/dantudor/MockServer.png)](http://travis-ci.org/dantudor/MockServer)
 
+Contributions and feedback welcome.
+
 Introduction
 ---
+
 MockServer is a tool to mock third-party API responses in your Symfony2 functional tests. 
 Using MockServer allows you to easily stub your API responses and manage those stubs within 
 your codebase in a meaningful structure and format.
 
 
-Installation (via composer)
+Installation
 ---
-To install via composer add ``dantudor/mockfs`` as a dependency in your ``composer.json`` file:
+
+To install via composer add ``dantudor/mock-server`` as a dependency in your ``composer.json`` file:
 
     {
         "require": {
             "dantudor/mock-server": "dev/master"
         }
     }
-    
+
+
 Setup
 ---
 
-Generate a new MockServerBundle
+Generate a new mocking bundle
 
     app/console mock:bundle:generate --namespace Acme/MockBundle
     
