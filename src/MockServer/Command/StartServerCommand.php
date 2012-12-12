@@ -52,7 +52,7 @@ class StartServerCommand extends Command
      * @return int|null|void
      * @throws \Exception
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output)
     {
         // When in dev mode we'll need tyo autoload the ExampleBundle
         if (true === $input->getOption('dev')) {
@@ -69,7 +69,7 @@ class StartServerCommand extends Command
         $port = $input->getArgument('port');
 
         $this->processManager = new ProcessManager($input->getArgument('pidFile'));
-        $this->processManager->flush();
+        $this->processManager->flush(false);
 
         /** @var $server \MockServer\Server\ServerInterface */
         $server = new $class($port, $host);

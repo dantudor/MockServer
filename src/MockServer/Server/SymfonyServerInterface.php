@@ -22,27 +22,21 @@ abstract class SymfonyServerInterface extends ServerInterface
      */
     protected $kernel;
 
-    public function __construct($port, $host = '127.0.0.1', Logger $logger = null)
+    public function __construct($port, $host = '127.0.0.1')
     {
         if (false === class_exists($this->kernelClassName)) {
             throw new KernelMissingException("The '{$this->kernelClassName}' kernel does not exist");
         }
 
         $kernelClassName = $this->kernelClassName;
-        $this->kernel = new $kernelClassName('prod', false);
+
+        $this->kernel = new $kernelClassName('dev', true);
 
         if (false === $this->kernel instanceof Kernel) {
             throw new KernelInvalidException("The '{$this->kernelClassName}' kernel must extend \\Symfony\\Component\\HttpKernel\\Kernel");
         }
 
         parent::__construct($port, $host);
-
-        // @codeCoverageIgnoreStart
-        if (null !== $logger) {
-            $this->logger = $logger;
-            $this->logger->info('Created Server: ', array('host' => $host, 'port' => $port));
-        }
-        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -59,12 +53,6 @@ abstract class SymfonyServerInterface extends ServerInterface
      */
     public function onRequest(Request $request, Response $response)
     {
-        // @codeCoverageIgnoreStart
-        if (null !== $this->logger) {
-            $this->logger->info('Request: ', array('path' => $request->getPath(), 'method' => $request->getMethod(), 'query' => $request->getQuery()));
-        }
-        // @codeCoverageIgnoreEnd
-
         $kernelResponse = $this->kernel->handle(SymfonyRequest::create($request->getPath()));
 
         $response->writeHead($kernelResponse->getStatusCode(), array('Content-Type' => 'text/html'));

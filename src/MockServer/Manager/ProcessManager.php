@@ -2,6 +2,8 @@
 namespace MockServer\Manager;
 
 use Symfony\Component\Filesystem\Filesystem;
+use MockServer\Process\ProcessIteratorAggregate;
+use MockServer\Process\Process;
 
 /**
  * Process Manager
@@ -15,7 +17,7 @@ class ProcessManager
     protected $processFile;
 
     /**
-     * @var \stdClass
+     * @var \MockServer\Process\ProcessIteratorAggregate
      */
     protected $processes;
 
@@ -24,22 +26,17 @@ class ProcessManager
      */
     protected $filesystem;
 
-    /**
-     * @var \Monolog\Logger
-     */
-    protected $logger = null;
-
      /**
       * @param $processFile
       */
-    public function __construct($processFile, Logger $logger = null)
+    public function __construct($processFile)
     {
-        $this->processes = new \stdClass();
         $this->processFile = (string) $processFile;
+        $this->processes = new ProcessIteratorAggregate();
         $this->filesystem = new Filesystem();
 
         if (false === $this->filesystem->exists($this->processFile)) {
-            file_put_contents($this->processFile, new \stdClass());
+            file_put_contents($this->processFile, serialize($this->processes));
         }
     }
 
@@ -56,14 +53,14 @@ class ProcessManager
     /**
      * Load from process file
      *
-     * @return array
+     * @return ProcessIteratorAggregate
      */
     public function load()
     {
         $this->processes = array();
 
         if (true === $this->filesystem->exists($this->processFile)) {
-            $this->processes = json_decode(file_get_contents($this->processFile));
+            $this->processes = unserialize(file_get_contents($this->processFile));
         }
 
         return $this->processes;
@@ -79,12 +76,9 @@ class ProcessManager
      */
     public function add($pid, $host, $port)
     {
-        $process = new \stdClass();
-        $process->pid = (string) $pid;
-        $process->host = (string) $host;
-        $process->port = (int) $port;
-
-        $this->processes->{$pid} = $process;
+        $this->processes->add(
+            new Process($pid, $host, $port)
+        );
 
         return $this;
     }
@@ -96,7 +90,7 @@ class ProcessManager
      */
     public function save()
     {
-        file_put_contents($this->processFile, json_encode($this->processes));
+        file_put_contents($this->processFile, serialize($this->processes));
 
         return $this;
     }
@@ -107,17 +101,17 @@ class ProcessManager
     public function flush($onlyDead = true, array $match = null)
     {
         $this->load();
-        $processes = get_object_vars($this->processes);
-        foreach ($processes as $process) {
+
+        foreach ($this->processes as $process) {
             if (null === $match || $this->match($process, $match)) {
-                if (true === $this->isActive($process->pid)) {
+                if (true === $this->isActive($process)) {
                     if (true === $onlyDead) {
                         continue;
                     }
-                    exec('kill -9 ' . $process->pid);
+                    exec('kill -9 ' . $process->getId());
                 }
 
-                unset($this->processes->{$process->pid});
+                $this->processes->delete($process);
             }
         }
 
@@ -127,12 +121,12 @@ class ProcessManager
     /**
      * Check if a process is active by id
      *
-     * @param $pid
+     * @param Process $process
      * @return bool
      */
-    public function isActive($pid)
+    public function isActive(Process $process)
     {
-        exec('ps -p ' . $pid, $isActive);
+        exec('ps -p ' . $process->getId(), $isActive);
 
         if (count($isActive) > 1) {
             return true;
@@ -144,31 +138,21 @@ class ProcessManager
     /**
      * Match Process
      *
-     * @param $process
+     * @param Process $process
      * @param array $criteria
      * @return bool
      */
-    protected function match($process, array $criteria)
+    protected function match(Process $process, array $criteria)
     {
         $matched = true;
 
         foreach ($criteria as $field => $value) {
-            if ($value !== $process->$field) {
+            $method = 'get' . ucwords($field);
+            if ($value !== $process->$method()) {
                 $matched = false;
             }
         }
 
         return $matched;
-    }
-
-    /**
-     * Sets the Monolog logger instance to be used for logging.
-     *
-     * @param \Monolog\Logger $logger
-     * @codeCoverageIgnore
-     */
-    public function setLogger(Logger $logger)
-    {
-        $this->logger = $logger;
     }
 }

@@ -1,0 +1,4 @@
+services:
+    mock_server.manager:
+        class: MockServer\Manager\ServerManager
+        arguments: ["%kernel.root_dir%/cache/mock"]

@@ -1,6 +1,8 @@
 <?php
 
 use MockFs\MockFs;
+use MockServer\Process\ProcessIteratorAggregate;
+use MockServer\Process\Process;
 
 class ProcessManagerTest extends PHPUnit_Framework_TestCase
 {
@@ -42,11 +44,12 @@ class ProcessManagerTest extends PHPUnit_Framework_TestCase
         $processManager = new \MockServer\Manager\ProcessManager($processFile);
 
         $this->assertSame($processManager, $processManager->add('12345', 'mock.host', 999));
-        $processes = $processManager->save()->load();
 
-        $this->assertSame('12345', $processes->{12345}->pid);
-        $this->assertSame('mock.host', $processes->{12345}->host);
-        $this->assertSame(999, $processes->{12345}->port);
+        $process = $processManager->save()->load()->getById(12345);
+
+        $this->assertSame(12345, $process->getId());
+        $this->assertSame('mock.host', $process->getHost());
+        $this->assertSame(999, $process->getPort());
     }
 
     /**
@@ -54,17 +57,14 @@ class ProcessManagerTest extends PHPUnit_Framework_TestCase
      */
     public function testProcessManagerLoad()
     {
-        $process = new stdClass();
-        $process->pid = 12345;
-        $process->host  = '127.0.0.1';
-        $process->port = 8080;
+        $process = new Process(12345, '127.0.0.1', 8080);
 
-        $processes = new stdClass();
-        $processes->{$process->pid} = $process;
+        $processes = new ProcessIteratorAggregate();
+        $processes->add($process);
 
         $mockFs = new MockFs();
         $mockFs->getFileSystem()->reset();
-        $mockFs->getFileSystem()->addFile('MockServer.pids', json_encode($processes));
+        $mockFs->getFileSystem()->addFile('MockServer.pids', serialize($processes));
 
         $processFile = 'mfs://MockServer.pids';
         $processManager = new \MockServer\Manager\ProcessManager($processFile);
@@ -86,7 +86,7 @@ class ProcessManagerTest extends PHPUnit_Framework_TestCase
         $processManager->add(12345, '127.0.0.1', 8080);
         $processManager->save();
 
-        $this->assertEquals('{"12345":{"pid":"12345","host":"127.0.0.1","port":8080}}', $mockFs->getFileSystem()->getChild('MockServer.pids')->getContents());
+        $this->assertInstanceOf('\MockServer\Process\ProcessIteratorAggregate', unserialize($mockFs->getFileSystem()->getChild('MockServer.pids')->getContents()));
     }
 
     /**
@@ -95,21 +95,18 @@ class ProcessManagerTest extends PHPUnit_Framework_TestCase
      */
     public function testProcessManagerFlush()
     {
-        $process = new stdClass();
-        $process->pid = 12345;
-        $process->host  = '127.0.0.1';
-        $process->port = 8080;
+        $process = new Process(12345, '127.0.0.1', 8080);
 
-        $processes = new stdClass();
-        $processes->{$process->pid} = $process;
+        $processes = new ProcessIteratorAggregate();
+        $processes->add($process);
 
         $mockFs = new MockFs();
-        $mockFs->getFileSystem()->addFile('MockServer.pids', json_encode($processes));
+        $mockFs->getFileSystem()->addFile('MockServer.pids', serialize($processes));
 
         $processFile = 'mfs://MockServer.pids';
         $processManager = new \MockServer\Manager\ProcessManager($processFile);
         $processManager->flush();
 
-        $this->assertEquals(new stdClass(), $processManager->load());
+        $this->assertEquals(new ProcessIteratorAggregate(), $processManager->load());
     }
 }

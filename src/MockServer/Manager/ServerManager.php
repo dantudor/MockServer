@@ -18,6 +18,11 @@ class ServerManager
     protected $pidFile = '/tmp/MockServerPid';
 
     /**
+     * @var ProcessManager
+     */
+    protected $processManager;
+
+    /**
      * @param null $pidFile
      */
     public function __construct($pidFile = null)
@@ -25,6 +30,8 @@ class ServerManager
         if (null !== $pidFile) {
             $this->pidFile = (string) $pidFile;
         }
+
+        $this->processManager = new ProcessManager($this->pidFile);
     }
 
     /**
@@ -49,7 +56,7 @@ class ServerManager
             }
         }
 
-        $cmd = __DIR__ . "/../bin/mockServer start \"{$server}\" \"{$host}\" {$port} \"{$this->pidFile}\" {$flagString}";
+        $cmd = __DIR__ . "/../bin/mockServer mock:server:start \"{$server}\" \"{$host}\" {$port} \"{$this->pidFile}\" {$flagString}";
         exec($cmd . ' > /dev/null 2>&1 < /dev/null &', $output);
     }
 
@@ -73,5 +80,15 @@ class ServerManager
         $this->pidFile = (string) $pidFile;
 
         return $this;
+    }
+
+    /**
+     * Get the process manager
+     *
+     * @return ProcessManager
+     */
+    public function getProcessManager()
+    {
+        return $this->processManager;
     }
 }
