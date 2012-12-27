@@ -44,3 +44,5 @@ Outstanding Development
 ---
 
 MockServer intends to prime data into the API responses direct from the functional test.
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/1b0414e837c760de2314ffc8f6f0f62c "githalytics.com")](http://githalytics.com/dantudor/MockServer)
