@@ -43,8 +43,8 @@ abstract class ServerInterface
     protected $logger;
 
     /**
-     * @param string $host
-     * @param int $port
+     * @param int    $port Port
+     * @param string $host Host
      */
     public function __construct($port, $host = '127.0.0.1')
     {
@@ -112,7 +112,7 @@ abstract class ServerInterface
     {
         try {
             $this->socket->listen($this->port, $this->host);
-        } catch(ConnectionException $e) {
+        } catch (ConnectionException $e) {
             throw new SocketConnectionException($e->getMessage(), $e->getCode());
         }
 
@@ -122,9 +122,8 @@ abstract class ServerInterface
     /**
      * onRequest Callback
      *
-     * @param \React\Http\Request $request
-     * @param \React\Http\Response $response
+     * @param Request  $request  Request
+     * @param Response $response Response
      */
     abstract public function onRequest(Request $request, Response $response);
-
 }

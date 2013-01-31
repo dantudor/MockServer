@@ -2,7 +2,9 @@
 
 namespace MockServer\Manager;
 
-use MockServer\Exception\InvalidServerException;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use MockServer\Server\Primer;
 
 /**
  * Server Manager
@@ -15,7 +17,12 @@ class ServerManager
     /**
      * @var string
      */
-    protected $pidFile = '/tmp/MockServerPid';
+    protected $kernelRootDir;
+
+    /**
+     * @var string
+     */
+    protected $pidFile;
 
     /**
      * @var ProcessManager
@@ -23,13 +30,23 @@ class ServerManager
     protected $processManager;
 
     /**
-     * @param null $pidFile
+     * @var \MockServer\Server\Primer
      */
-    public function __construct($pidFile = null)
+    protected $primer;
+
+    /**
+     * @param Primer $primer         Primer*
+     * @param string $kernelRootDir  Kernel Root Directory
+     * @param string $kernelCacheDir Kernel Cache Directory
+     * @param string $pidFile        Process ID Cache File
+     */
+    public function __construct(Primer $primer, $kernelRootDir, $kernelCacheDir, $pidFile)
     {
-        if (null !== $pidFile) {
-            $this->pidFile = (string) $pidFile;
-        }
+        $this->primer = $primer;
+
+        $this->kernelRootDir = (string) $kernelRootDir;
+        $this->kernelCacheDir = (string) $kernelCacheDir;
+        $this->pidFile = (string) $kernelCacheDir . '/' . $pidFile;
 
         $this->processManager = new ProcessManager($this->pidFile);
     }
@@ -37,27 +54,16 @@ class ServerManager
     /**
      * Create new server
      *
-     * @param string $server
-     * @param int $port
-     * @param string $host
-     * @param bool $devMode
-     * @throws \InvalidArgumentException
+     * @param string $environment Symfony Environment
+     * @param int    $port        Port
+     * @param string $host        Host
      */
-    public function create($server, $port, $host = '127.0.0.1', array $flags = null)
+    public function create($environment, $port, $host = '127.0.0.1')
     {
-        if (false === class_exists($server)) {
-            throw new InvalidServerException('Invalid server type: ' . $server);
-        }
-
-        $flagString = '';
-        if (null !== $flags) {
-            foreach($flags as $flag) {
-                $flagString .= ' ' . $flag;
-            }
-        }
-
-        $cmd = __DIR__ . "/../bin/mockServer mock:server:start \"{$server}\" \"{$host}\" {$port} \"{$this->pidFile}\" {$flagString}";
+        $cmd = __DIR__ . "/../bin/mockServer mock:server:start \"$this->kernelRootDir\" \"{$environment}\" \"{$host}\" {$port} \"{$this->pidFile}\"";
         exec($cmd . ' > /dev/null 2>&1 < /dev/null &', $output);
+        sleep(1);
+
     }
 
     /**
@@ -74,6 +80,8 @@ class ServerManager
      * Set pid file
      *
      * @param string $pidFile
+     *
+     * @return ServerManager
      */
     public function setPidFile($pidFile)
     {
@@ -90,5 +98,14 @@ class ServerManager
     public function getProcessManager()
     {
         return $this->processManager;
+    }
+
+    /**
+     * Get Primer
+     * @return \MockServer\Server\Primer
+     */
+    public function getPrimer()
+    {
+        return $this->primer;
     }
 }

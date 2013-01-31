@@ -11,7 +11,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 use MockServer\Manager\ProcessManager;
 use MockServer\Exception\ServerPortInUseException;
 use MockServer\Exception\SocketConnectionException;
+use MockServer\Server\SymfonyServer;
 
+/**
+ * Server Start Command
+ */
 class StartServerCommand extends Command
 {
     /**
@@ -37,42 +41,32 @@ class StartServerCommand extends Command
         $this
             ->setName('mock:server:start')
             ->setDescription('Start a new Mock Server')
-            ->addArgument('class', InputArgument::REQUIRED, 'What server type should be started?')
+            ->addArgument('kernel_root_dir', InputArgument::REQUIRED, 'Where is your AppKernel?')
+            ->addArgument('environment', InputArgument::REQUIRED, 'What environment should be used?')
             ->addArgument('host', InputArgument::REQUIRED, 'What hostname should the server use?')
             ->addArgument('port', InputArgument::REQUIRED, 'What port should the server run on?')
-            ->addArgument('pidFile', InputArgument::REQUIRED, 'Where do you want to store your pid files?')
-            ->addOption('dev', null, InputOption::VALUE_NONE, 'Run in dev mode to autoload the ExampleBundle')
-        ;
+            ->addArgument('pidFile', InputArgument::REQUIRED, 'Where do you want to store your pid files?');
     }
 
     /**
      * Execute
-     * @param \Symfony\Component\Console\Input\InputInterface $input
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *
+     * @param InputInterface  $input  InputInterface
+     * @param OutputInterface $output OutputInterface
+     *
      * @return int|null|void
      * @throws \Exception
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        // When in dev mode we'll need tyo autoload the ExampleBundle
-        if (true === $input->getOption('dev')) {
-            spl_autoload_register(function($class) {
-                $classFile = __DIR__ . '/../../../examples/' . str_replace('\\', '/', $class) . '.php';
-                if (true === file_exists($classFile)) {
-                    include_once($classFile);
-                }
-            });
-        }
-
-        $class = $input->getArgument('class');
-        $host = $input->getArgument('host');
-        $port = $input->getArgument('port');
-
         $this->processManager = new ProcessManager($input->getArgument('pidFile'));
         $this->processManager->flush(false);
 
-        /** @var $server \MockServer\Server\ServerInterface */
-        $server = new $class($port, $host);
+        $host = $input->getArgument('host');
+        $port = $input->getArgument('port');
+
+        /** @var $server SymfonyServer */
+        $server = new SymfonyServer($input->getArgument('kernel_root_dir'), $input->getArgument('environment'), $port, $host);
 
         try {
             $this->processManager->add(getmypid(), $host, $port);

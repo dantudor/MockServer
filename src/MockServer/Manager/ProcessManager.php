@@ -27,7 +27,7 @@ class ProcessManager
     protected $filesystem;
 
      /**
-      * @param $processFile
+      * @param string $processFile
       */
     public function __construct($processFile)
     {
@@ -69,9 +69,10 @@ class ProcessManager
     /**
      * Add a new process under management
      *
-     * @param string $pid
-     * @param string $host
-     * @param int $port
+     * @param string $pid  Process Id
+     * @param string $host Host
+     * @param int    $port Port
+     *
      * @return ProcessManager
      */
     public function add($pid, $host, $port)
@@ -97,6 +98,9 @@ class ProcessManager
 
     /**
      * Flush memory and the file of all processes - Kill when requested
+
+     * @param bool  $onlyDead Only flush dead processes
+     * @param array $match    Match Criteria
      */
     public function flush($onlyDead = true, array $match = null)
     {
@@ -122,6 +126,7 @@ class ProcessManager
      * Check if a process is active by id
      *
      * @param Process $process
+     *
      * @return bool
      */
     public function isActive(Process $process)
@@ -138,8 +143,9 @@ class ProcessManager
     /**
      * Match Process
      *
-     * @param Process $process
-     * @param array $criteria
+     * @param Process $process  Process
+     * @param array   $criteria Match Criteria
+     *
      * @return bool
      */
     protected function match(Process $process, array $criteria)

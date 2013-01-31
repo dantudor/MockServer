@@ -1,4 +1,11 @@
+parameters:
+    mock_server.pid_file: "mock-server-pids"
+
 services:
+    mock_server.primer:
+        class: MockServer\Server\Primer
+        arguments: [%kernel.cache_dir%, @jms_serializer]
+
     mock_server.manager:
         class: MockServer\Manager\ServerManager
-        arguments: ["%kernel.root_dir%/cache/mock"]
+        arguments: [@mock_server.primer, %kernel.root_dir%, %kernel.cache_dir%, %mock_server.pid_file%]

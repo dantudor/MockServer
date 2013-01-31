@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-if (file_exists(__DIR__ . '/../../../../../../vendor/autoload.php) {
+if (file_exists(__DIR__ . '/../../../../../../vendor/autoload.php')) {
     require __DIR__ . '/../../../../../../vendor/autoload.php';
 } else {
     // Only used when run as base project not dep
@@ -10,9 +10,7 @@ if (file_exists(__DIR__ . '/../../../../../../vendor/autoload.php) {
 
 use Symfony\Component\Console\Application;
 use MockServer\Command\StartServerCommand;
-use MockServer\Command\GenerateServerCommand;
 
 $application = new Application();
 $application->add(new StartServerCommand);
-$application->add(new GenerateServerCommand);
 $application->run();

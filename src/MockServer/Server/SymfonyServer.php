@@ -16,11 +16,6 @@ use Monolog\Logger;
 class SymfonyServer extends ServerInterface
 {
     /**
-     * @var string
-     */
-    protected $kernelClassName;
-
-    /**
      * @var \Symfony\Component\HttpKernel\Kernel
      */
     protected $kernel;
@@ -28,21 +23,20 @@ class SymfonyServer extends ServerInterface
     /**
      * Constructor
      *
-     * @param int    $port Port
-     * @param string $host Host
+     * @param string $kernelDir   Kernel Directory
+     * @param string $environment Environment
+     * @param int    $port        Port
+     * @param string $host        Host
      *
      * @throws KernelMissingException
      * @throws KernelInvalidException
      */
-    public function __construct($port, $host = '127.0.0.1')
+    public function __construct($kernelDir, $environment, $port, $host = '127.0.0.1')
     {
-        if (false === class_exists($this->kernelClassName)) {
-            throw new KernelMissingException("The '{$this->kernelClassName}' kernel does not exist");
-        }
+        require_once $kernelDir . '/bootstrap.php.cache';
+        require_once $kernelDir . '/MockKernel.php';
 
-        $kernelClassName = $this->kernelClassName;
-
-        $this->kernel = new $kernelClassName('dev', true);
+        $this->kernel = new \MockKernel($environment, true);
 
         if (false === $this->kernel instanceof Kernel) {
             throw new KernelInvalidException("The '{$this->kernelClassName}' kernel must extend \\Symfony\\Component\\HttpKernel\\Kernel");
@@ -65,8 +59,8 @@ class SymfonyServer extends ServerInterface
      */
     public function onRequest(Request $request, Response $response)
     {
-        $kernelResponse = $this->kernel->handle(SymfonyRequest::create($request->getPath()));
-
+        $uri = 'http://' . $this->getHost() . ':' . $this->getPort() . $request->getPath();
+        $kernelResponse = $this->kernel->handle(SymfonyRequest::create($uri));
         $response->writeHead($kernelResponse->getStatusCode(), array('Content-Type' => 'text/html'));
         $response->end($kernelResponse->getContent());
     }
