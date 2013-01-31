@@ -10,7 +10,10 @@ use React\Http\Request;
 use React\Http\Response;
 use Monolog\Logger;
 
-abstract class SymfonyServerInterface extends ServerInterface
+/**
+ * Symfony Server
+ */
+class SymfonyServer extends ServerInterface
 {
     /**
      * @var string
@@ -22,6 +25,15 @@ abstract class SymfonyServerInterface extends ServerInterface
      */
     protected $kernel;
 
+    /**
+     * Constructor
+     *
+     * @param int    $port Port
+     * @param string $host Host
+     *
+     * @throws KernelMissingException
+     * @throws KernelInvalidException
+     */
     public function __construct($port, $host = '127.0.0.1')
     {
         if (false === class_exists($this->kernelClassName)) {
@@ -48,8 +60,8 @@ abstract class SymfonyServerInterface extends ServerInterface
     }
 
     /**
-     * @param \React\Http\Request $request
-     * @param \React\Http\Response $response
+     * @param Request  $request  Request
+     * @param Response $response Response
      */
     public function onRequest(Request $request, Response $response)
     {
