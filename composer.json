@@ -18,10 +18,10 @@
     "require": {
         "php": ">=5.3",
         "react/http": "0.2.*",
-        "symfony/symfony": "2.1.*",
-        "sensio/generator-bundle": "2.1.*"
     },
     "require-dev": {
+        "symfony/symfony": "2.1.6",
+        "sensio/generator-bundle": "2.1.*",
         "dantudor/mockfs": "dev-master"
     }
 }
