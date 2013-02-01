@@ -2,7 +2,6 @@
 
 namespace MockServer\Server;
 
-use JMS\Serializer\Serializer;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -11,11 +10,6 @@ use Symfony\Component\Finder\Finder;
 class Primer
 {
     /**
-     * @var Serializer
-     */
-    protected $serializer;
-
-    /**
      * @var string
      */
     protected $primingDir;
@@ -23,13 +17,11 @@ class Primer
     /**
      * Constructor
      *
-     * @param int        $baseDir    Base Directory
-     * @param Serializer $serializer Serializer
+     * @param int $baseDir Base Directory
      */
-    public function __construct($baseDir, Serializer $serializer)
+    public function __construct($baseDir)
     {
         $this->baseDir = realpath($baseDir. '/../');
-        $this->serializer = $serializer;
     }
 
     /**

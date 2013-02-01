@@ -4,7 +4,7 @@ parameters:
 services:
     mock_server.primer:
         class: MockServer\Server\Primer
-        arguments: [%kernel.cache_dir%, @jms_serializer]
+        arguments: [%kernel.cache_dir%]
 
     mock_server.manager:
         class: MockServer\Manager\ServerManager

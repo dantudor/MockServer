@@ -8,13 +8,37 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpKernel\Kernel;
 use React\Http\Request;
 use React\Http\Response;
-use Monolog\Logger;
 
 /**
  * Symfony Server
  */
-class SymfonyServer extends ServerInterface
+class SymfonyServer
 {
+    /**
+     * @var \React\EventLoop\LibEventLoop|\React\EventLoop\StreamSelectLoop
+     */
+    protected $loop;
+
+    /**
+     * @var string
+     */
+    protected $host;
+
+    /**
+     * @var int
+     */
+    protected $port;
+
+    /**
+     * @var HttpServer
+     */
+    protected $httpServer;
+
+    /**
+     * @var Socket
+     */
+    protected $socket;
+
     /**
      * @var \Symfony\Component\HttpKernel\Kernel
      */
@@ -33,6 +57,9 @@ class SymfonyServer extends ServerInterface
      */
     public function __construct($kernelDir, $environment, $port, $host = '127.0.0.1')
     {
+        $this->port = (int) $port;
+        $this->host = (string) $host;
+
         require_once $kernelDir . '/bootstrap.php.cache';
         require_once $kernelDir . '/MockKernel.php';
 
@@ -42,7 +69,36 @@ class SymfonyServer extends ServerInterface
             throw new KernelInvalidException("The '{$this->kernelClassName}' kernel must extend \\Symfony\\Component\\HttpKernel\\Kernel");
         }
 
-        parent::__construct($port, $host);
+        $this->loop = EventLoop::create();
+        $this->socket = new Socket($this->loop);
+        $this->httpServer = new HttpServer($this->socket);
+
+        $server = $this;
+        $this->httpServer->on('request', function ($request, $response) use ($server) {
+            // @codeCoverageIgnoreStart
+            $server->onRequest($request, $response);
+            // @codeCoverageIgnoreEnd
+        });
+    }
+
+    /**
+     * Get Server Port
+     *
+     * @return int
+     */
+    public function getPort()
+    {
+        return $this->port;
+    }
+
+    /**
+     * Get Server Host
+     *
+     * @return string
+     */
+    public function getHost()
+    {
+        return $this->host;
     }
 
     /**
@@ -51,6 +107,26 @@ class SymfonyServer extends ServerInterface
     public function getKernel()
     {
         return $this->kernel;
+    }
+
+    /**
+     * Get the Server Socket
+     *
+     * @return Socket
+     */
+    public function getSocket()
+    {
+        return $this->socket;
+    }
+
+    /**
+     * Get the Http Server
+     *
+     * @return HttpServer
+     */
+    public function getHttpServer()
+    {
+        return $this->httpServer;
     }
 
     /**
