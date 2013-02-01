@@ -2,21 +2,23 @@
 
 namespace MockServer\Command;
 
-use Symfony\Component\Console\Command\Command;
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use MockServer\Generator\MockGenerator;
 
 /**
  * Server Start Command
  */
-class InstallCommand extends Command
+class InstallCommand extends ContainerAwareCommand
 {
-    /**
-     * @var OutputInterface
-     */
+    /**  @var OutputInterface */
     protected $output;
+
+    /** @var \MockServer\Generator\MockGenerator */
+    protected $generator;
 
     /**
      * Configure
@@ -25,7 +27,9 @@ class InstallCommand extends Command
     {
         $this
             ->setName('mock:server:install')
-            ->setDescription('Install an example mock');
+            ->setDescription('Install a new mock server')
+            ->addArgument('name', InputArgument::REQUIRED, 'A unique name for your new mock server instance <info>(lowercase, no spaces)</info>')
+            ->setHelp('The <info>%command.name%</info> command will create a new mock server instance.');
     }
 
     /**
@@ -39,15 +43,32 @@ class InstallCommand extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $filesystem = new \Symfony\Component\Filesystem\Filesystem();
+        /** @var $filesystem \Symfony\Component\Filesystem\Filesystem */
+        $filesystem = $this->getContainer()->get('filesystem');
 
-        $rootDir = $this->getApplication()->getKernel()->getRootDir();
+        $rootDir = $this->getContainer()->getParameter('kernel.root_dir');
+        $name = $url = preg_replace('/[^\da-z]/i', '', strtolower($input->getArgument('name')));
 
-        $filesystem->copy(__DIR__ . '/../../../BasicUsage/MockKernel.php', $rootDir . '/MockKernel.php');
-        $filesystem->mkdir($rootDir . '/mock/acme');
-        $filesystem->copy(__DIR__ . '/../../../BasicUsage/mock/acme/config.yml', $rootDir . '/mock/acme/config.yml');
-        $filesystem->copy(__DIR__ . '/../../../BasicUsage/mock/acme/parameters.yml', $rootDir . '/mock/acme/parameters.yml');
-        $filesystem->copy(__DIR__ . '/../../../BasicUsage/mock/acme/routing.yml', $rootDir . '/mock/acme/routing.yml');
-        $filesystem->copy(__DIR__ . '/../../../BasicUsage/mock/acme/security.yml', $rootDir . '/mock/acme/security.yml');
+        if (false === $filesystem->exists($rootDir . '/MockKernel.php')) {
+            $filesystem->copy(__DIR__ . '/../Resources/Deploy/MockKernel.php', $rootDir . '/MockKernel.php');
+            $output->writeln(sprintf('Installing new MockKernel into <info>%s</info>', $rootDir . '/MockKernel.php'));
+        }
+
+        $output->writeln(sprintf('Creating basic configuration for <info>%s</info>', $name));
+
+        $generator = $this->getGenerator();
+        $generator->generate($rootDir, $name);
+
+        $output->writeln('Generating the new mock server: <info>OK</info>');
+    }
+
+
+    protected function getGenerator()
+    {
+        if (null === $this->generator) {
+            $this->generator = new MockGenerator($this->getContainer()->get('filesystem'), __DIR__.'/../Resources/Deploy');
+        }
+
+        return $this->generator;
     }
 }
