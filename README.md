@@ -8,10 +8,7 @@ Contributions and feedback welcome.
 Introduction
 ---
 
-MockServer is a tool to mock third-party API responses in your Symfony2 functional tests. 
-Using MockServer allows you to easily stub your API responses and manage those stubs within 
-your codebase in a meaningful structure and format.
-
+Use MockServer to mock your third party API responses at source and not service level.
 
 Installation
 ---
@@ -24,25 +21,44 @@ To install via composer add ``dantudor/mock-server`` as a dependency in your ``c
         }
     }
 
+Once installed register the ``MockServerBundle`` in the ``AppKernel`` for your dev and test environments:
+
+    ...
+    if (in_array($this->getEnvironment(), array('dev', 'test'))) {
+        $bundles[] = new MockServer\MockServerBundle();
+    }
+    ...
+
 
 Setup
 ---
-
-Generate a new mocking bundle
-
-    app/console mock:bundle:generate --namespace Acme/MockBundle
+Run the install command to create a new MockServer instance in your project:
     
+    app/console mock:server:install --name <name>
+
+This will create the following new configuration in your root symfony directory:
+
+    app/MockKernel.php
+    app/mock/<name>/config.yml
+    app/mock/<name>/parameters.yml
+    app/mock/<name>/routing.yml
+    app/mock/<name>/security.yml
     
-Usage
----
+You will now need to create a new controller to be used by the Mock Server. Generate a new mocking bundle, but don't register then in the AppKernel and or default Routing as they'll need to be registered only in your MockKernel and mock routing.
 
-For now you can see a working example in https://github.com/dantudor/MockServerExample which demonstrates 
-partial mocking of the GitHub API.
+    app/console bundle:generate --namespace Mock/FacebookBundle
+
+Edit app/MockKernel.php and add the following bundle in the ``MockKernel::registerBundles()`` method:
+ 
+    new Mock\FacebookBundle\MockFacebookBundle(),
+
+Import the bundle's routing resource in the ``app/mock/routing.yml`` file:
+
+    MockFacebookBundle:
+        resource: "@MockFacebookBundle/Controller/"
+        type:     annotation
+        prefix:   /
 
 
-Outstanding Development
----
-
-MockServer intends to prime data into the API responses direct from the functional test.
-
-[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/1b0414e837c760de2314ffc8f6f0f62c "githalytics.com")](http://githalytics.com/dantudor/MockServer)
+Your new Mock Server instance is now ready to use.
+   
