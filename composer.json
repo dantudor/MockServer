@@ -20,7 +20,7 @@
         "react/http": "0.2.*"
     },
     "require-dev": {
-        "symfony/symfony": "2.1.6",
+        "symfony/symfony": "2.1.*",
         "sensio/generator-bundle": "2.1.*",
         "dantudor/mockfs": "dev-master"
     }
