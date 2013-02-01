@@ -114,8 +114,10 @@ I do this in the BeforeScenario event of my behat FeatureContext:
     {
         /** @var $serverManager \MockServer\Manager\ServerManager */
         $this->mocker = $this->kernel->getContainer()->get('mock_server.manager');
-        $this->mocker->create('facebook', 8080, '127.0.0.1');
+        $this->mocker->create('name', 8080, '127.0.0.1');
     }
+
+NOTE: The first parameter of the create method of the mocker object is the name you gave your instance in the setup steps above.
 
 The final step is to tell your application that facebook is now responding on ``http://127.0.0.1:8080``. If you have defined the facebook api domain in your config.yml files then you will need to update your config_test.yml file to use the mock server ip and port:
 
