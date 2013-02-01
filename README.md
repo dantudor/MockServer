@@ -71,7 +71,7 @@ You need to mock the response for this request to return a json string that desc
 Create a new Controller in your MockFacebookBundle and associate an action with the route /users/{name} that responds with the JSON your application would expect.
     
     <?php
-    // src/Mock/FacebookBundle/Controller/UserController.php
+    //src/Mock/FacebookBundle/Controller/UserController.php
     
     namespace Mock\FacebookBundle\Controller;
 
@@ -81,7 +81,7 @@ Create a new Controller in your MockFacebookBundle and associate an action with 
     use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
     use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
     
-    class DefaultController extends Controller
+    class UserController extends Controller
     {
         /**
          * @Route("/users/{name}")
@@ -93,7 +93,7 @@ Create a new Controller in your MockFacebookBundle and associate an action with 
             $data = array(
                 'name' => $name,
                 'email' => 'dtudor01@gmail.com',
-                'location' => 'Location'
+                'location' => 'London'
             );
             
             return new JsonResponse($data, 200);
@@ -124,6 +124,50 @@ The final step is to tell your application that facebook is now responding on ``
     facebook_wrapper:
         base_uri:  http://127.0.0.1:8888
 
+Priming
+---
+Once you have the basic setup in place you are able to prime data into your mock server from your tests. 
+You have to prime the server in the correct order you want the repsonses to use your data.
+In your Feature Context add the following code in the beforeScenario event:
+
+    $data = array(
+        'user' => array(
+            'name' => 'dantudor', 
+            'email' => 'dtudor01@gmail.com', 
+            'location' => 'London'
+        )
+    );
+    $this->mocker->getPrimer()->prime('facebook', '/users/dantudor', 'GET', $data);
+
+    $data = array(
+        'error' => 404
+    );
+    $this->mocker->getPrimer()->prime('facebook', '/users/invaliduser', 'GET', $data);
+    
+You now need to tell your mock server controller that it should expect some primed data. Add the following code to the index action of Mock\FacebookBundle\Controller\UserController:
+
+    public function indexAction($name)
+    {
+        $primer = $this->get('mock_server.primer');
+
+        $data = $primer->getData(
+            $this->container->getParameter('kernel.environment'),
+            $this->getRequest()->getPathInfo(),
+            $this->getRequest()->getMethod()
+        );
+        
+        if (array_key_exists('error', $data)) {
+            $response = new JsonResponse($data, 404);
+        }
+        
+        $response = new JsonResponse($data, 404);
+        
+        return $response;
+    }
+
+The primed data can contain either the data you want the action to respond with, or a reference to use in a switch to handle the request differently.
+As you have a full stack symfony app available you can make your mock server as intelligent as required. 
+Link it to Doctrine, foward the request to the actual live service if required, etc.
 
 
 
