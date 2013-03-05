@@ -32,7 +32,7 @@ Setup
 
 Run the install command to create a new MockServer instance in your project:
     
-    app/console mock:server:install --name <name>
+    app/console mock:server:install <name>
 
 This will create the following new configuration in your root symfony directory:
 
@@ -44,7 +44,7 @@ This will create the following new configuration in your root symfony directory:
     
 You will now need to create a new controller to be used by the Mock Server. Generate a new mocking bundle, but don't register then in the AppKernel and or default Routing as they'll need to be registered only in your MockKernel and mock routing.
 
-    app/console bundle:generate --namespace Mock/FacebookBundle
+    app/console generate:bundle --namespace Mock/FacebookBundle
 
 Edit app/MockKernel.php and add the following bundle in the ``MockKernel::registerBundles()`` method:
  
@@ -114,7 +114,9 @@ I do this in the BeforeScenario event of my behat FeatureContext:
     {
         /** @var $serverManager \MockServer\Manager\ServerManager */
         $this->mocker = $this->kernel->getContainer()->get('mock_server.manager');
-        $this->mocker->create('name', 8080, '127.0.0.1');
+        
+        // The server name is what was specified when we ran the mock:server:install command earlier!
+        $this->mocker->create(INSERT_SERVER_NAME, 8080, '127.0.0.1');
     }
 
 NOTE: The first parameter of the create method of the mocker object is the name you gave your instance in the setup steps above.
